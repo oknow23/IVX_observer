@@ -6,7 +6,7 @@ from urllib import request,error
 from urllib.request import urlopen
 from datetime import datetime
 from bs4 import BeautifulSoup
-from flask import Flask, request, abort
+from flask import Flask, abort
 
 class Quote(object):
 
@@ -39,7 +39,10 @@ quotes = dict()
 
 if __name__ == "__main__":
     def downWeb(url):
+        headers = {'User-Agent': 'User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'}
+
         try:
+            req = request.Request(url, headers=headers)
             html_data = urlopen(url).read().decode()
         except error.HTTPError as e:
             print("get url Fail")
