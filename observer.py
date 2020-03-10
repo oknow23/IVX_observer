@@ -1,6 +1,8 @@
 
 import os
 import time
+
+from urllib import request,error
 from urllib.request import urlopen
 from datetime import datetime
 from bs4 import BeautifulSoup
@@ -36,12 +38,36 @@ targets= [TXF_NAME]
 quotes = dict()
 
 if __name__ == "__main__":
+    def downWeb(url):
+        try:
+            html_data = urlopen(url).read().decode()
+        except error.HTTPError as e:
+            print("get url Fail")
+            print(e.reason, e.code, e.headers)
+            return
+        except error.URLError as e:
+            print(e.reason)
+            return
+        else:
+            # print('Request Successfully')
+            soup = BeautifulSoup(html_data, 'html.parser')
+            return soup.find_all('tr', {"class": "custDataGridRow", "bgcolor": "White"})
+
+    def combineMsg(name,qtime,price,updown):
+        msg = """\n%s
+        ==========
+        報價時間:%s
+        現價       :%0.2f
+        漲跌       :%0.2f
+        """%(name,qtime,price,updown)
+
+        return msg
+
     while 1:
         msg = ""
         url = 'http://info512.taifex.com.tw/Future/FusaQuote_Norl.aspx'
-        html_data = urlopen(url).read().decode()
-        soup = BeautifulSoup(html_data, 'html.parser')
-        rows = soup.find_all('tr', {"class": "custDataGridRow", "bgcolor": "White"})
+        rows = downWeb(url)
+
         for row in rows:
             items = row.find_all('td')
             name = items[0].a.text.strip()
@@ -56,26 +82,16 @@ if __name__ == "__main__":
                 quote.low = float(items[12].font.text.replace(',', ''))
 
                 quotes[name] = quote
-                msg += """\n%s
-    ==========
-    報價時間:%s
-    現價       :%0.2f
-    漲跌       :%0.2f
-    """%(quote.name, items[14].font.text, quote.trade_price, quote.change)
+                msg += combineMsg(quote.name, items[14].font.text, quote.trade_price, quote.change)
         
         url = 'https://info512.taifex.com.tw/Future/VIXQuote_Norl.aspx'
-        html_data = urlopen(url).read().decode()
-        soup = BeautifulSoup(html_data, 'html.parser')
-        rows = soup.find_all('tr', {"class": "custDataGridRow", "bgcolor": "White"})
+        rows = downWeb(url)
+
         for row in rows:
             items = row.find_all('td')
             delta = float(items[1].font.text) - float(items[2].font.text)
             
-            msg += """\n%s
-    ==========
-    報價時間:%s
-    現價       :%0.2f
-    漲跌       :%0.2f
-    """%(items[0].a.text.strip(), items[6].font.text.strip(), float(items[1].font.text.strip()), delta)
+            msg += combineMsg(items[0].a.text.strip(), items[6].font.text.strip(), float(items[1].font.text.strip()), delta)
+        
         print(msg)
         time.sleep(5)
