@@ -64,10 +64,16 @@ if __name__ == "__main__":
     def combineMsg(name,qtime,price,updown):
         msg = """\n%s
         ==========
-        報價時間:%s
-        現價       :%0.2f
-        漲跌       :%0.2f
+        Time quotes     :%s
+        Current price   :%0.2f
+        Up and down     :%0.2f
         """%(name,qtime,price,updown)
+        # msg = """\n%s
+        # ==========
+        # 報價時間:%s
+        # 現價       :%0.2f
+        # 漲跌       :%0.2f
+        # """%(name,qtime,price,updown)
 
         return msg
 
@@ -90,7 +96,8 @@ if __name__ == "__main__":
                 quote.low = float(items[12].font.text.replace(',', ''))
 
                 quotes[name] = quote
-                msg += combineMsg(quote.name, items[14].font.text, quote.trade_price, quote.change)
+                # msg += combineMsg(quote.name, items[14].font.text, quote.trade_price, quote.change)
+                msg += combineMsg("Taiwan Index Spot", items[14].font.text, quote.trade_price, quote.change)
         
         url = 'https://info512.taifex.com.tw/Future/VIXQuote_Norl.aspx'
         rows = downWeb(url)
@@ -99,7 +106,8 @@ if __name__ == "__main__":
             items = row.find_all('td')
             delta = float(items[1].font.text) - float(items[2].font.text)
             
-            msg += combineMsg(items[0].a.text.strip(), items[6].font.text.strip(), float(items[1].font.text.strip()), delta)
+            # msg += combineMsg(items[0].a.text.strip(), items[6].font.text.strip(), float(items[1].font.text.strip()), delta)
+            msg += combineMsg("IVX", items[6].font.text.strip(), float(items[1].font.text.strip()), delta)
         
         print(msg)
         time.sleep(5)
