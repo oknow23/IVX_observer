@@ -52,7 +52,7 @@ if __name__ == "__main__":
                 return
             except error.URLError as e:
                 print(e.reason)
-                return
+                time.sleep(1)   # resolve [Errno 111] Connection refused or Network is unreachable
             except  http.client.HTTPException as e:
                 print("HTTPException retry!!")
                 time.sleep(1)
