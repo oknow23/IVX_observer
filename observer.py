@@ -82,24 +82,32 @@ if __name__ == "__main__":
             if name in targets:
                 quote = Quote()
                 quote.name = name
-                quote.trade_price = float(items[6].font.text.replace(',', ''))
-                quote.change = float(items[7].font.text)
-                quote.trade_time = datetime.strptime(items[14].font.text, "%H:%M:%S")
-                quote.open = float(items[10].font.text.replace(',', ''))
-                quote.high = float(items[11].font.text.replace(',', ''))
-                quote.low = float(items[12].font.text.replace(',', ''))
 
-                quotes[name] = quote
-                msg += combineMsg(quote.name, items[14].font.text, quote.trade_price, quote.change)
-        
-        url = 'https://info512.taifex.com.tw/Future/VIXQuote_Norl.aspx'
-        rows = downWeb(url)
+                try:
+                    quote.trade_price = float(items[6].font.text.replace(',', ''))
+                except:
+                    print("Not open yet")
+                    break
+                else:
+                    quote.change = float(items[7].font.text)
+                    quote.trade_time = datetime.strptime(items[14].font.text, "%H:%M:%S")
+                    quote.open = float(items[10].font.text.replace(',', ''))
+                    quote.high = float(items[11].font.text.replace(',', ''))
+                    quote.low = float(items[12].font.text.replace(',', ''))
 
-        for row in rows:
-            items = row.find_all('td')
-            delta = float(items[1].font.text) - float(items[2].font.text)
-            
-            msg += combineMsg(items[0].a.text.strip(), items[6].font.text.strip(), float(items[1].font.text.strip()), delta)
+                    quotes[name] = quote
+                    # msg += combineMsg(quote.name, items[14].font.text, quote.trade_price, quote.change)
+                    msg += combineMsg("Taiwan Index Spot", items[14].font.text, quote.trade_price, quote.change)
         
-        print(msg)
+                url = 'https://info512.taifex.com.tw/Future/VIXQuote_Norl.aspx'
+                rows = downWeb(url)
+
+                for row in rows:
+                    items = row.find_all('td')
+                    delta = float(items[1].font.text) - float(items[2].font.text)
+
+                    # msg += combineMsg(items[0].a.text.strip(), items[6].font.text.strip(), float(items[1].font.text.strip()), delta)
+                    msg += combineMsg("IVX", items[6].font.text.strip(), float(items[1].font.text.strip()), delta)
+
+                print(msg)
         time.sleep(5)
